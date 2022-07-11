@@ -8,12 +8,12 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Ingredient
+from core.models import Ingredients
 
-from recipe.serializers import IngredientSerializer
+from recipe.serializers import IngredientsSerializer
 
 
-INGREDIENTS_URL = reverse('recipe:ingredient-list')
+INGREDIENTS_URL = reverse('recipe:ingredients-list')
 
 
 def create_user(email='user@example.com', password='testpass123'):
@@ -44,21 +44,21 @@ class PrivateIngredientsApiTests(TestCase):
 
     def test_retrieve_ingredients(self):
         """Test retrieving a list of ingredients."""
-        Ingredient.objects.create(user=self.user, name='Kale')
-        Ingredient.objects.create(user=self.user, name='Vanilla')
+        Ingredients.objects.create(user=self.user, name='Kale')
+        Ingredients.objects.create(user=self.user, name='Vanilla')
 
         res = self.client.get(INGREDIENTS_URL)
 
-        ingredients = Ingredient.objects.all().order_by('-name')
-        serializer = IngredientSerializer(ingredients, many=True)
+        ingredients = Ingredients.objects.all().order_by('-name')
+        serializer = IngredientsSerializer(ingredients, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
     def test_ingredients_limited_to_user(self):
         """Test list of ingredients is limited to authenticated user."""
         user2 = create_user(email='user2@example.com')
-        Ingredient.objects.create(user=user2, name='Salt')
-        ingredient = Ingredient.objects.create(user=self.user, name='Pepper')
+        Ingredients.objects.create(user=user2, name='Salt')
+        ingredient = Ingredients.objects.create(user=self.user, name='Pepper')
 
         res = self.client.get(INGREDIENTS_URL)
 
